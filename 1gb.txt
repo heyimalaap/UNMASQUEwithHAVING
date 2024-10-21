@@ -1,0 +1,72 @@
++-----------------------+----------+
+|      Module name      |   Time   |
++-----------------------+----------+
+|  Metadata Extractor I |  0.01 s  |
+|     From Extractor    | 29.25 s  |
+| Metadata Extractor II |  0.59 s  |
+|         Backup        |  0.01 s  |
+|   Correlated Sampler  |  0.54 s  |
+|       Minimizer       | 248.61 s |
+|     Join Extractor    |  0.01 s  |
+|   GroupBy Extractor   |  0.2 s   |
+|  Predicate Extractor  |  0.72 s  |
++-----------------------+----------+
+Hidden query
+===============
+select c_mktsegment, sum(l_extendedprice*(1 - l_discount) + l_quantity) as revenue, o_orderdate, o_shippriority from customer, orders, lineitem where c_custkey = o_custkey and l_orderkey = o_orderkey and o_orderdate <= date '1995-10-11' and l_quantity < 100 group by o_orderdate, o_shippriority, c_mktsegment having sum(l_extendedprice) >= 10000 and min(l_extendedprice) < 1000 order by revenue desc, o_orderdate asc, o_shippriority asc limit 4;
+
+Extracted query
+===============
+SELECT ... FROM customer, orders, lineitem
+        WHERE orders.o_orderkey = lineitem.l_orderkey AND customer.c_custkey = orders.o_custkey AND orders.o_orderdate <= 1995-10-11 AND lineitem.l_quantity <= 99.99
+        GROUP BY customer.c_mktsegment, orders.o_shippriority, orders.o_orderdate
+        HAVING MIN(lineitem.l_extendedprice) <= 999.99 AND SUM(lineitem.l_extendedprice) >= 10000
+
++-----------------------+---------+
+|      Module name      |   Time  |
++-----------------------+---------+
+|  Metadata Extractor I |  0.0 s  |
+|     From Extractor    | 17.43 s |
+| Metadata Extractor II |  1.16 s |
+|         Backup        |  0.01 s |
+|   Correlated Sampler  |  0.39 s |
+|       Minimizer       | 372.4 s |
+|     Join Extractor    |  0.0 s  |
+|   GroupBy Extractor   |  0.22 s |
+|  Predicate Extractor  |  0.86 s |
++-----------------------+---------+
+Hidden query
+===============
+select c_mktsegment, sum(l_extendedprice*(1 - l_discount) + l_quantity) as revenue, o_orderdate, o_shippriority from customer, orders, lineitem where c_custkey = o_custkey and l_orderkey = o_orderkey and o_orderdate <= date '1995-10-11' and l_quantity < 100 group by o_orderdate, o_shippriority, c_mktsegment having avg(l_extendedprice) >= 10000 and min(l_extendedprice) < 1000 order by revenue desc, o_orderdate asc, o_shippriority asc limit 4;
+
+Extracted query
+===============
+SELECT ... FROM customer, orders, lineitem
+        WHERE orders.o_orderkey = lineitem.l_orderkey AND customer.c_custkey = orders.o_custkey AND orders.o_orderdate <= 1995-10-11 AND lineitem.l_quantity <= 99.99
+        GROUP BY customer.c_mktsegment, orders.o_shippriority, orders.o_orderdate
+        HAVING MIN(lineitem.l_extendedprice) <= 999.99 AND AVG(lineitem.l_extendedprice) >= 10000.0000000000000000
+
+
++-----------------------+----------+
+|      Module name      |   Time   |
++-----------------------+----------+
+|  Metadata Extractor I |  0.0 s   |
+|     From Extractor    | 16.24 s  |
+| Metadata Extractor II |  1.06 s  |
+|         Backup        |  0.02 s  |
+|   Correlated Sampler  |  0.51 s  |
+|       Minimizer       | 245.03 s |
+|     Join Extractor    |  0.0 s   |
+|   GroupBy Extractor   |  0.18 s  |
+|  Predicate Extractor  |  0.7 s   |
++-----------------------+----------+
+Hidden query
+===============
+select c_mktsegment, sum(l_extendedprice*(1 - l_discount) + l_quantity) as revenue, o_orderdate, o_shippriority from customer, orders, lineitem where c_custkey = o_custkey and l_orderkey = o_orderkey and o_orderdate <= date '1995-10-13' and l_quantity <= 123 group by o_orderdate, o_shippriority, c_mktsegment having avg(l_extendedprice) >= 9325 and min(l_extendedprice) <= 1212 order by revenue desc, o_orderdate asc, o_shippriority asc limit 4;
+
+Extracted query
+===============
+SELECT ... FROM customer, orders, lineitem
+        WHERE orders.o_orderkey = lineitem.l_orderkey AND customer.c_custkey = orders.o_custkey AND orders.o_orderdate <= 1995-10-13 AND lineitem.l_quantity <= 123.00
+        GROUP BY customer.c_mktsegment, orders.o_shippriority, orders.o_orderdate
+        HAVING MIN(lineitem.l_extendedprice) <= 1212.00 AND AVG(lineitem.l_extendedprice) >= 9325.0000000000000000

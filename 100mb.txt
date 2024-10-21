@@ -1,0 +1,13 @@
++-----------------------+---------+
+|      Module name      |   Time  |
++-----------------------+---------+
+|  Metadata Extractor I |  0.01 s |
+|     From Extractor    |  1.81 s |
+| Metadata Extractor II |  0.05 s |
+|         Backup        |  0.02 s |
+|   Correlated Sampler  |  0.07 s |
+|       Minimizer       | 10.48 s |
+|     Join Extractor    |  0.0 s  |
+|   GroupBy Extractor   |  0.19 s |
+|  Predicate Extractor  |  0.57 s |
++-----------------------+---------+
