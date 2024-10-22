@@ -92,7 +92,7 @@ def aggregation_extractor(ctx: UnmasqueContext):
 
     def fmt(val):
         val_fmt = val
-        if type(val) is not int:
+        if (type(val) is not int) and (type(val) is not decimal.Decimal) and (type(val) is not float):
             val_fmt = f"'{val}'"
         return val_fmt
 
@@ -164,7 +164,7 @@ def aggregation_extractor(ctx: UnmasqueContext):
 
             other_table_sum_attribs = sum_pred_attribs_on_table(other_table)
             for sum_attrib, s_val in other_table_sum_attribs:
-                update_val = s_val / alpha
+                update_val = s_val / (alpha + 1)
                 ctx.connection.sql(f"UPDATE {other_table} SET {sum_attrib} = {fmt(update_val)};", execute_only=True)
 
         ctx.connection.sql(f"DELETE FROM {table};", execute_only=True)
@@ -188,6 +188,14 @@ def aggregation_extractor(ctx: UnmasqueContext):
 
         found = False
         aggr = None
+
+        if len(proj_deps) == 1 and proj_deps[0][1] == proj_name:
+            # Most likely a groupby element
+            # TODO: come up with a better way
+            logger.debug(f"Group by element detected.")
+            found = True
+            projection_aggregations.append(aggr)
+            continue
 
         for dep in proj_deps:
             d_table, d_attrib = dep
@@ -216,7 +224,7 @@ def aggregation_extractor(ctx: UnmasqueContext):
                 # logger.debug(f"\t\t + k: {k}, s1: {s1}, s2: {s2}, o1: {o1}, o2: {o2}, agg_map: {agg_map}")
 
                 # aggr = test_for_aggr(d_table, d_attrib, i, s1, s2)
-                alpha = 2
+                alpha = 3
                 o1 = None
                 o2 = None
                 proj_val = None
@@ -241,7 +249,7 @@ def aggregation_extractor(ctx: UnmasqueContext):
                         logger.debug(f"\t\t o1 = {o1}, o2 = {o2}, res = {proj_val}")
                         logger.debug(f"\t\t aggr = {aggr}")
                         break
-                    alpha *= 2
+                    alpha = (alpha + 1) * 2 - 1;
                     uninit_t1_t2_temp_tabs(d_table)
                     rollback()
 
@@ -261,7 +269,7 @@ def aggregation_extractor(ctx: UnmasqueContext):
                     # aggr = test_for_aggr(d_table, d_attrib, i, s1, s2)
 
             
-                    alpha = 2
+                    alpha = 3
                     o1 = None
                     o2 = None
                     proj_val = None
@@ -285,7 +293,7 @@ def aggregation_extractor(ctx: UnmasqueContext):
                             logger.debug(f"\t\t o1 = {o1}, o2 = {o2}, res = {proj_val}")
                             logger.debug(f"\t\t aggr = {aggr}")
                             break
-                        alpha *= 2
+                        alpha = (alpha + 1) * 2 - 1;
                         uninit_t1_t2_temp_tabs(d_table)
                         rollback()
                     break
