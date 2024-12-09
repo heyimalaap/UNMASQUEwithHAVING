@@ -27,5 +27,8 @@ def query_from_context(ctx: UnmasqueContext):
     if ctx.having_predicates:
         having_list = [f'{agg}({table}.{attrib}) {bound} {val}' for table, attrib, agg, bound, val in ctx.having_predicates]
         query += f'\n\tHAVING {" AND ".join(having_list)}'
+    if ctx.has_orderby:
+        query += f'\n\tORDER BY {ctx.orderby_string}'
 
+    query += ';'
     return query

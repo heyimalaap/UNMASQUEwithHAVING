@@ -18,6 +18,7 @@ class UnmasqueContext:
         self.projection_extraction_done = False
         self.aggregation_extraction_done = False
         self.predicate_separator_done = False
+        self.orderby_extraction_done = False
 
         # Runtimes
         self.metadata_s1_extraction_time: float = 0
@@ -32,6 +33,7 @@ class UnmasqueContext:
         self.projection_extraction_time: float = 0
         self.aggregation_extraction_time: float = 0
         self.predicate_separator_time: float = 0
+        self.orderby_extraction_time: float = 0
 
         # Metadata
         self.db_relations: List[str] | None = None
@@ -59,15 +61,22 @@ class UnmasqueContext:
         self.filter_predicates = []
         self.having_predicates = []
         self.separatable_predicates = []
+        self.filter_attrib_dict = dict()
 
         # Projection Extractor
         self.projected_attrib = []
         self.projection_names = []
         self.projection_deps = []
         self.projection_sol = []
+        self.projection_joined_attribs = []
 
         # Aggregation Extraction
         self.projection_aggregations = []
+        
+        # Order by Extraction
+        self.has_orderby: bool = False
+        self.orderby_string: str = ""
+        self.orderby_list = []
     
     def set_metadata1(self, db_tables):
         self.metadata_s1_extraction_done = True
@@ -98,18 +107,20 @@ class UnmasqueContext:
         self.groupby_extraction_done = True
         self.groupby_attribs = groupby_attribs
 
-    def set_predicate_extractor(self, filter_predicates, having_predicates, separatable_predicates):
+    def set_predicate_extractor(self, filter_predicates, having_predicates, separatable_predicates, filter_attrib_dict):
         self.predicate_extraction_done = True
         self.filter_predicates = filter_predicates
         self.having_predicates = having_predicates
         self.separatable_predicates = separatable_predicates
+        self.filter_attrib_dict = filter_attrib_dict
 
-    def set_projection_extractor(self, projected_attrib, projection_names, projection_deps, projection_sol):
+    def set_projection_extractor(self, projected_attrib, projection_names, projection_deps, projection_sol, projection_joined_attribs):
         self.projection_extraction_done = True
         self.projected_attrib = projected_attrib
         self.projection_names = projection_names
         self.projection_deps = projection_deps
         self.projection_sol = projection_sol
+        self.projection_joined_attribs = projection_joined_attribs
 
     def set_aggregation_extraction(self, projection_aggregations):
         self.aggregation_extraction_done = True
@@ -119,6 +130,12 @@ class UnmasqueContext:
         self.predicate_separator_done = True
         self.filter_predicates = filter_predicates
         self.having_predicates = having_predicates
+        
+    def set_orderby_extraction(self, has_orderby, orderby_list, orderby_string):
+        self.orderby_extraction_done = True
+        self.has_orderby = has_orderby
+        self.orderby_list = orderby_list
+        self.orderby_string = orderby_string
 
     def print_timing(self):
         t = PrettyTable()
@@ -136,6 +153,7 @@ class UnmasqueContext:
             ["Projection Extractor", f'{round(self.projection_extraction_time, 2)} s'],
             ["Aggregation Extractor", f'{round(self.aggregation_extraction_time, 2)} s'],
             ["Predicate Separator", f'{round(self.predicate_separator_time, 2)} s'],
+            ["OrderBy Extractor", f'{round(self.orderby_extraction_time, 2)} s'],
         ])
 
         print(t)

@@ -4,6 +4,8 @@ from typing import Any
 import math
 
 from loguru import logger
+
+from unmasque2.src.projection_extractor import get_min_and_max_val
 from .context import UnmasqueContext
 
 # Constants
@@ -228,6 +230,10 @@ def predicate_extractor(ctx: UnmasqueContext):
 
         if r2_is_phi:
             predicates.append((table, attrib, "<=", r))
+
+        # TODO: Remove this later
+        min_val, max_val = get_attrib_min_max_value(table, attrib)
+        filter_attrib_dict[(table, attrib)] = (min_val if l is None else l, max_val if r is None else r)
 
         return predicates
 
@@ -461,6 +467,7 @@ def predicate_extractor(ctx: UnmasqueContext):
     having_predicates = []
     filter_predicates = []
     separable_predicates = []
+    filter_attrib_dict = dict() # TODO: This is added here to retrofit OrderBy from UNMASQUE's code.
 
     # If there is no group-by attribute, then this means that the query was an
     # SPJ query, then we do not need to use the HAVING machinary on this query.
@@ -514,6 +521,9 @@ def predicate_extractor(ctx: UnmasqueContext):
 
             # Upper bound
             ub = get_upper_bound(table, attrib) 
+
+            min_val, max_val = get_attrib_min_max_value(table, attrib)
+            filter_attrib_dict[(table, attrib)] = (min_val if lb is None else lb, max_val if ub is None else ub)
 
             if lb is not None or ub is not None:
                 predicate_candidates.append((table, attrib, lb, ub))
@@ -605,7 +615,7 @@ def predicate_extractor(ctx: UnmasqueContext):
 
 
     # Set context
-    ctx.set_predicate_extractor(filter_predicates, having_predicates, separable_predicates)
+    ctx.set_predicate_extractor(filter_predicates, having_predicates, separable_predicates, filter_attrib_dict)
 
     logger.info('Finished Predicate extractor')
 

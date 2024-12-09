@@ -3,6 +3,7 @@ import time
 from loguru import logger
 
 from unmasque2.src.aggregation_extractor import aggregation_extractor
+from unmasque2.src.orderby_extractor import orderby_extractor
 from unmasque2.src.predicate_separator import predicate_separator
 from unmasque2.src.projection_extractor import projection_extractor
 from .context import UnmasqueContext
@@ -134,3 +135,8 @@ class Pipeline(ContextDecorator):
                 end_time = time.time()
                 self.ctx.predicate_separator_time = end_time - start_time
 
+            with logger.contextualize(module='OrderBy Extractor'):
+                start_time = time.time()
+                orderby_extractor(self.ctx)
+                end_time = time.time()
+                self.ctx.orderby_extraction_time = end_time - start_time

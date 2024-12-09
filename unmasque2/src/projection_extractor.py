@@ -209,7 +209,8 @@ def projection_extractor(ctx: UnmasqueContext):
                 for item in join_edge:
                     if item[1] == attrib:
                         other_attribs = copy.deepcopy(join_edge)
-                        other_attribs.remove((tabname, attrib))
+                        infered_tabname = item[0] # this is a hack! :C
+                        other_attribs.remove((infered_tabname, attrib))
                         break
         return other_attribs
 
@@ -399,6 +400,7 @@ def projection_extractor(ctx: UnmasqueContext):
 
         if len(new_result) != 0:
             projection_dep = get_index_of_difference(attrib, result, new_result, projection_dep, tabname)
+            print(f"proj deps : {projection_dep}")
         keys_to_skip = keys_to_skip + other_attribs
         for other_attrib in other_attribs:
             s_value_dict[other_attrib] = val
@@ -466,7 +468,7 @@ def projection_extractor(ctx: UnmasqueContext):
                     # No dependency and value is one so in groupby file will differentiate between count or 1.
                     projected_attrib.append('')
 
-        return projected_attrib, projection_names, projection_dep, True
+        return projected_attrib, projection_names, projection_dep, joined_attribs, True
 
     g_syms = []
     g_param_list = []
@@ -665,19 +667,19 @@ def projection_extractor(ctx: UnmasqueContext):
 
     logger.info('Starting Projection extractor')
     s_values = []
-    projected_attrib, projection_names, projection_dep, check = find_projection_deps(ctx.hidden_query, s_values)
+    projected_attrib, projection_names, projection_dep, joined_attribs, check = find_projection_deps(ctx.hidden_query, s_values)
     if if_dependencies_found_incomplete(projection_names, projection_dep):
         for s_v in s_values:
             if s_v[2] is not None:
                 update_with_val(s_v[1], s_v[0], s_v[2])
-    projected_attrib, projection_names, projection_dep, check = find_projection_deps(ctx.hidden_query, s_values)
+    projected_attrib, projection_names, projection_dep, joined_attribs, check = find_projection_deps(ctx.hidden_query, s_values)
     if not check:
         logger.error("Some problem while identifying the dependency list!")
         raise RuntimeError("Some problem while identifying the dependency list!")
 
     projection_sol = find_solution_on_multi(projected_attrib, projection_dep, ctx.hidden_query)
 
-    ctx.set_projection_extractor(projected_attrib, projection_names, projection_dep, projection_sol)
+    ctx.set_projection_extractor(projected_attrib, projection_names, projection_dep, projection_sol, joined_attribs)
 
     logger.debug(projected_attrib)
     logger.info('Finished Projection extractor')
