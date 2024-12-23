@@ -54,7 +54,7 @@ default_hidden_query = "select c_mktsegment, sum(l_extendedprice*(1 - l_discount
 #     " Limit 10;"
 
 def run_unmasque():
-    conn = PostgresConnection(db_name='tpch', schema='public', host='localhost', port=5435, user='postgres', password='postgres')
+    conn = PostgresConnection(db_name='tpch', schema='public', host='localhost', port=5432, user='tpch', password='tpch')
     ctx = UnmasqueContext(conn, default_hidden_query)
 
     with Pipeline(ctx) as pipeline:

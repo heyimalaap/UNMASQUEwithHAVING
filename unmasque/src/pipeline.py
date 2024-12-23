@@ -2,12 +2,11 @@ from contextlib import ContextDecorator
 import time
 from loguru import logger
 
-from unmasque2.src.aggregation_extractor import aggregation_extractor
-from unmasque2.src.orderby_extractor import orderby_extractor
-from unmasque2.src.predicate_separator import predicate_separator
-from unmasque2.src.projection_extractor import projection_extractor
+from .aggregation_extractor import aggregation_extractor
+from .orderby_extractor import orderby_extractor
+from .predicate_separator import predicate_separator
+from .projection_extractor import projection_extractor
 from .context import UnmasqueContext
-
 from .metadata_extractor import metadata_extractor_stage1, metadata_extractor_stage2
 from .from_extractor import from_extractor
 from .correlated_sampler import correlated_sampler
@@ -15,6 +14,7 @@ from .minimizer import minimizer
 from .join_extractor import join_extractor
 from .groupby_extractor import groupby_extractor
 from .predicate_extractor import predicate_extractor
+from .limit_extractor import limit_extractor
 
 class Pipeline(ContextDecorator):
     def __init__(self, ctx: UnmasqueContext):
@@ -140,3 +140,9 @@ class Pipeline(ContextDecorator):
                 orderby_extractor(self.ctx)
                 end_time = time.time()
                 self.ctx.orderby_extraction_time = end_time - start_time
+
+            with logger.contextualize(module='Limit Extractor'):
+                start_time = time.time()
+                limit_extractor(self.ctx)
+                end_time = time.time()
+                self.ctx.limit_extraction_time = end_time - start_time

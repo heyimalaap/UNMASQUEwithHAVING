@@ -2,7 +2,7 @@ from datetime import date
 import decimal
 import math
 from loguru import logger
-from unmasque2.src.context import UnmasqueContext
+from .context import UnmasqueContext
 
 
 def forbidden_set(o1, o2):

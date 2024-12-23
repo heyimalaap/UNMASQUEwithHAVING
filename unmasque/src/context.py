@@ -34,6 +34,7 @@ class UnmasqueContext:
         self.aggregation_extraction_time: float = 0
         self.predicate_separator_time: float = 0
         self.orderby_extraction_time: float = 0
+        self.limit_extraction_time: float = 0
 
         # Metadata
         self.db_relations: List[str] | None = None
@@ -154,6 +155,7 @@ class UnmasqueContext:
             ["Aggregation Extractor", f'{round(self.aggregation_extraction_time, 2)} s'],
             ["Predicate Separator", f'{round(self.predicate_separator_time, 2)} s'],
             ["OrderBy Extractor", f'{round(self.orderby_extraction_time, 2)} s'],
+            ["Limit Extractor", f'{round(self.limit_extraction_time, 2)} s'],
         ])
 
         print(t)

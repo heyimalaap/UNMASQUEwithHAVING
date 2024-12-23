@@ -5,7 +5,7 @@ import math
 
 from loguru import logger
 
-from unmasque2.src.projection_extractor import get_min_and_max_val
+from .projection_extractor import get_min_and_max_val
 from .context import UnmasqueContext
 
 # Constants
